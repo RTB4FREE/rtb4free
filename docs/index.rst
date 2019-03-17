@@ -33,11 +33,13 @@ Learn about documentation authoring tools such as Sphinx and MkDocs
 to help you create fantastic documentation for your project.
 
 * **Getting started**:
-  :doc:`With Docker <intro/getting-started-with-docker` |
+  :doc:`With Docker <intro/getting-started-with-docker>` |
   :doc:`With Amazon AWS <intro/getting-started-with-amazon-aws>`
 
 * **Importing your existing documentation**:
   :doc:`Import guide <intro/import-guide>`
+
+.. _getting-started:
 
 .. toctree::
    :maxdepth: 2
@@ -64,27 +66,6 @@ to help you create fantastic documentation for your project.
    api/index
    embed
 
-.. _feature-docs:
-
-.. toctree::
-   :maxdepth: 2
-   :glob:
-   :caption: Feature Documentation
-
-   webhooks
-   badges
-   custom_domains
-   localization
-   vcs
-   subprojects
-   conda
-   canonical
-   single_version
-   privacy
-   user-defined-redirects
-   automatic-redirects
-   features/*
-
 .. _about-docs:
 
 .. toctree::
@@ -104,7 +85,7 @@ to help you create fantastic documentation for your project.
    abandoned-projects
    dmca/index
 
-.. _dev-docs:
+.. _developer-docs:
 
 .. toctree::
    :maxdepth: 1
@@ -124,17 +105,8 @@ to help you create fantastic documentation for your project.
    issue-labels
    security
    design
-   RTD Theme <https://sphinx-rtd-theme.readthedocs.io/en/latest/>
 
-.. _commercial-docs:
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Commercial Documentation
-
-   commercial/index
-
-.. _custom-docs:
+.. _getting-help:
 
 .. toctree::
    :maxdepth: 2
