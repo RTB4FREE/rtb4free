@@ -23,30 +23,34 @@ Free and open source
 .. _RTB4FREE: http://rtb4free.com/
 
 
-Getting started
----------------
+Getting Started With RTB4FREE
+-----------------------------
 
-Are you new to software documentation
-or are you looking to use your existing docs with Read the Docs?
-Learn about documentation authoring tools such as Sphinx and MkDocs
-to help you create fantastic documentation for your project.
+If you are new to RTB4FREE, the first thing you will probably want to do is demo
+the platform to see if it is right for your needs.  While RTB4FREE is a fully functional
+platform capable of handling advertising on a massive scale, it is also simple to
+install for demo purposes.
 
-* **Getting started**:
+Follow the instructions below to quickly get started:
+
+* **Quick installation**:
   :doc:`With Docker <intro/getting-started-with-docker>` |
   :doc:`With Amazon AWS <intro/getting-started-with-amazon-aws>`
 
-* **Connecting bidstream supply**:
-  :doc:`Import guide <developer/bidstream-supply-connections>`
+* **Connect bidstream supply**:
+  :doc:`Demo bidstream <developer/bidstream-supply-connections>` |
+  :doc:`Autoconnect real supply <developer/bidstream-supply-connections>`
 
-* **Creating your first campaign**:
-  :doc:`Import guide <user/campaign-manager/creating-your-first-campaign>`
+
+* **Create your first campaign**:
+  :doc:`Make a campaign <user/campaign-manager/creating-your-first-campaign>`
 
 .. toctree::
    :maxdepth: 1
    :hidden:
    :caption: Getting Started
 
-   5-minute installation with Docker <intro/getting-started-with-docker>
+   5-minute installation <intro/getting-started-with-docker>
    AWS quickstart <intro/getting-started-with-amazon-aws>
 
 .. toctree::
@@ -55,6 +59,7 @@ to help you create fantastic documentation for your project.
 
    Campaign Manager <user/campaign-manager/index>
    Bidder <user/bidder>
+   DMP <user/dmp>
    Analytics <user/analytics>
 
 .. toctree::
@@ -81,3 +86,10 @@ to help you create fantastic documentation for your project.
    about/support
    about/roadmap
    about/team
+
+.. toctree::
+  :maxdepth: 1
+  :caption: Other Resources
+
+  OpenRTB 2.5 Spec <http://www.idx.com>
+  OpenRTB 3.0 Spec <http://www.idx.com>
