@@ -12,8 +12,6 @@ if RTB4FREE is right for your business.
 
 * Generate web pages, printable PDFs, documents for e-readers (ePub),
   and more all from the same sources
-* You can use reStructuredText or :ref:`Markdown <intro/getting-started-with-sphinx:Using Markdown with Sphinx>`
-  to write documentation
 * An extensive system of cross-referencing code and documentation
 * Syntax highlighted code samples
 * A vibrant ecosystem of first and third-party extensions_
@@ -25,7 +23,7 @@ Quick start video
 -----------------
 
 This screencast will help you get started or you can
-:ref:`read our guide below <intro/getting-started-with-sphinx:Quick start>`.
+:ref:`read our guide below <intro/getting-started-with-docker:Quick start>`.
 
 .. raw:: html
 
@@ -73,16 +71,16 @@ Your ``index.rst`` has been built into ``index.html``
 in your documentation output directory (typically ``_build/html/index.html``).
 Open this file in your web browser to see your docs.
 
-.. figure:: ../_static/images/first-steps/sphinx-hello-world.png
-    :align: right
-    :figwidth: 300px
-    :target: ../_static/images/first-steps/sphinx-hello-world.png
-
-    Your Sphinx project is built
+.. .. figure:: ../_static/images/first-steps/sphinx-hello-world.png
+..     :align: right
+..     :figwidth: 300px
+..     :target: ../_static/images/first-steps/sphinx-hello-world.png
+..
+..     Your Sphinx project is built
 
 Edit your files and rebuild until you like what you see, then commit your changes and push to your public repository.
 Once you have Sphinx documentation in a public repository, you can start using Read the Docs
-by :doc:`importing your docs </intro/import-guide>`.
+.. by :doc:`importing your docs </intro/import-guide>`.
 
 .. _install Sphinx: http://sphinx-doc.org/install.html
 .. _reStructuredText: http://sphinx-doc.org/rest.html

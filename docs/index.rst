@@ -5,23 +5,22 @@ Welcome to the `RTB4FREE`_ documentation hub.  Here you can find the online manu
 and living documentation repository for RTB4FREE, the leading digital advertising
 platform for businesses who want to reach their audience on the open web.
 
-Never out of sync
-    Whenever you push code to your favorite version control system,
-    whether that is Git, Mercurial, Bazaar, or Subversion,
-    Read the Docs will automatically build your docs
-    so your code and documentation are always up-to-date.
+Living manual
+    Documentation is updated in the same manner as code - and a build is made for
+    each version of RTB4FREE.  You can easily view current and previous versions
+    of documentation from this website.
 
-Multiple versions
-    Read the Docs can host and build multiple versions of your docs
-    so having a 1.0 version of your docs and a 2.0 version
-    of your docs is as easy as having a separate branch or tag in your version control system.
+International first
+    While the english language version of the documentation is the reference version,
+    other languages are available as well.  Our documentation is hosted in Github
+    along with all other parts of our codebase - so you can update the doc in your
+    favorite language and submit a pull request to keep it current.
 
 Free and open source
-    Read the Docs is free and open source and hosts documentation
-    for nearly 100,000 large and small open source projects
-    in almost every human and computer language.
+    The documentation is built like our software - community driven, open source,
+    free for all to view.
 
-.. _Read the docs: http://readthedocs.org/
+.. _RTB4FREE: http://rtb4free.com/
 
 
 Getting started
@@ -36,78 +35,49 @@ to help you create fantastic documentation for your project.
   :doc:`With Docker <intro/getting-started-with-docker>` |
   :doc:`With Amazon AWS <intro/getting-started-with-amazon-aws>`
 
-* **Importing your existing documentation**:
-  :doc:`Import guide <intro/import-guide>`
+* **Connecting bidstream supply**:
+  :doc:`Import guide <developer/bidstream-supply-connections>`
 
-.. _getting-started:
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Getting Started
-
-   5 minute Docker installation <intro/getting-started-with-docker>
-   intro/getting-started-with-amazon
-
-.. _user-docs:
-
-.. toctree::
-   :maxdepth: 2
-   :caption: User Documentation
-
-   Campaign Manager <user/campaign-manager>
-   Bidder <user/bidder>
-   Analytics <user/analytics>
-   config-file/index
-   guides/index
-   api/index
-   embed
-
- .. toctree::
-    :maxdepth: 1
-    :caption: Developer Documentation
-
-    changelog
-    install
-    development/search
-    architecture
-    tests
-    docs
-    development/standards
-    development/buildenvironments
-    symlinks
-    settings
-    i18n
-    issue-labels
-    security
-    design
-
-.. _about-docs:
+* **Creating your first campaign**:
+  :doc:`Import guide <user/campaign-manager/creating-your-first-campaign>`
 
 .. toctree::
    :maxdepth: 1
-   :caption: About Read the Docs
+   :hidden:
+   :caption: Getting Started
 
-   contribute
-   support
-   faq
-   roadmap
-   team
-   gsoc
-   code-of-conduct
-   privacy-policy
-   advertising/index
-   sponsors
-   open-source-philosophy
-   story
-   abandoned-projects
-   dmca/index
-
-.. _developer-docs:
-
-.. _getting-help:
+   5-minute installation with Docker <intro/getting-started-with-docker>
+   AWS quickstart <intro/getting-started-with-amazon-aws>
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Custom Install Documentation
+   :maxdepth: 1
+   :caption: User Documentation
 
-   custom_installs/index
+   Campaign Manager <user/campaign-manager/index>
+   Bidder <user/bidder>
+   Analytics <user/analytics>
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Developer Documentation
+
+   Overview <developer/index>
+   Installation <developer/installation>
+   Configuration <developer/configuration>
+   Customization <developer/customization>
+   Running tests <developer/tests>
+   Issues <developer/issues>
+   Changelog <developer/changelog>
+   Security <developer/security>
+   Contributing <developer/contribute>
+   developer/i18n
+
+.. toctree::
+   :maxdepth: 1
+   :caption: More Help
+
+   about/faq
+   about/consulting
+   about/support
+   about/roadmap
+   about/team
