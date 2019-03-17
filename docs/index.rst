@@ -43,10 +43,9 @@ to help you create fantastic documentation for your project.
 
 .. toctree::
    :maxdepth: 2
-   :hidden:
    :caption: Getting Started
 
-   intro/getting-started-with-docker
+   5 minute Docker installation <intro/getting-started-with-docker>
    intro/getting-started-with-amazon
 
 .. _user-docs:
@@ -55,16 +54,32 @@ to help you create fantastic documentation for your project.
    :maxdepth: 2
    :caption: User Documentation
 
-   versions
-   builds
-   features
-   connected-accounts
-   support
-   faq
+   Campaign Manager <user/campaign-manager>
+   Bidder <user/bidder>
+   Analytics <user/analytics>
    config-file/index
    guides/index
    api/index
    embed
+
+ .. toctree::
+    :maxdepth: 1
+    :caption: Developer Documentation
+
+    changelog
+    install
+    development/search
+    architecture
+    tests
+    docs
+    development/standards
+    development/buildenvironments
+    symlinks
+    settings
+    i18n
+    issue-labels
+    security
+    design
 
 .. _about-docs:
 
@@ -73,6 +88,8 @@ to help you create fantastic documentation for your project.
    :caption: About Read the Docs
 
    contribute
+   support
+   faq
    roadmap
    team
    gsoc
@@ -86,25 +103,6 @@ to help you create fantastic documentation for your project.
    dmca/index
 
 .. _developer-docs:
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Developer Documentation
-
-   changelog
-   install
-   development/search
-   architecture
-   tests
-   docs
-   development/standards
-   development/buildenvironments
-   symlinks
-   settings
-   i18n
-   issue-labels
-   security
-   design
 
 .. _getting-help:
 
