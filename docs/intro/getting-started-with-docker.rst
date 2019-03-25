@@ -10,11 +10,10 @@ if RTB4FREE is right for your business.
   is not recommended for production use - only for demonstration purposes.
 
 
-* Generate web pages, printable PDFs, documents for e-readers (ePub),
-  and more all from the same sources
-* An extensive system of cross-referencing code and documentation
-* Syntax highlighted code samples
-* A vibrant ecosystem of first and third-party extensions_
+* Starts a complete RTB system, along with a campaign manager and reporting system.
+* A demo campaign configuration is loaded and can be edited in the campaign manager. 
+* An SSP exchange simulator is started, sending bid requests to the system. This shows a working RTB application processing real bids. 
+* View how data flows through the system in real-time with the deployed reporting system.
 
 .. _extensions: http://www.sphinx-doc.org/en/master/ext/builtins.html#builtin-sphinx-extensions
 
@@ -35,78 +34,158 @@ This screencast will help you get started or you can
 Quick start
 -----------
 
-Assuming you have Python already, `install Sphinx`_:
+This quick start process will deploy a Docker swarm application.  
+You must have Docker installed on your system before you start - https://docs.docker.com/v17.12/install/
+
+Create the Docker swarm.
 
 .. prompt:: bash $
 
-    pip install sphinx
+    docker swarm init
 
-Create a directory inside your project to hold your docs:
-
-.. prompt:: bash $
-
-    cd /path/to/project
-    mkdir docs
-
-Run ``sphinx-quickstart`` in there:
+Create the docker compose file. Edit a new file called docker-compose-rtb4free.yml, then add the following contents.
 
 .. prompt:: bash $
 
-    cd docs
-    sphinx-quickstart
+    version: "3"
+    services:
+      zookeeper:
+        image: "zookeeper"
+      kafka:
+        image: "ches/kafka"
+        environment:
+          ZOOKEEPER_IP: "zookeeper"
+        ports:
+          - "9092:9092"
+        depends_on:
+          - zookeeper
+      zerospike:
+        image: "jacamars/zerospike:v1"
+        environment:
+          BROKERLIST: "kafka:9092"
+        depends_on:
+          - kafka
+        command: bash -c "sleep 5 && ./wait-for-it.sh kafka:9092 -t 120 && sleep 1; ./zerospike"
+      bidder:
+        image: "jacamars/rtb4free:v1"
+        environment:
+          BROKERLIST: "kafka:9092"
+          PUBSUB: "zerospike"
+          EXTERNAL: "http://localhost"
+          ADMINPORT: "0"
+          ACCOUNTING: "accountingsystem"
+          FREQGOV: "false"
+          INDEXPAGE: "/index.html"
+        ports:
+          - "80:8080"
+          - "8155:8155"
+        depends_on:
+          - kafka
+          - zerospike
+        command: bash -c "sleep 5 && ./wait-for-it.sh kafka:9092 -t 120 && ./wait-for-it.sh zerospike:6000 -t 120 && sleep 1; ./rtb4free"
+      crosstalk:
+        image: "jacamars/crosstalk:v1"
+        environment:
+          REGION: "US"
+          GHOST: "elastic1"
+          AHOST: "elastic1"
+          BROKERLIST: "kafka:9092"
+          PUBSUB: "zerospike"
+          CONTROL: "8100"
+          JDBC: "jdbc:mysql://db/rtb4free?user=ben&password=test"
+          PASSWORD: "iamspartacus"
+        depends_on:
+          - kafka
+          - zerospike
+      db:
+        image: ploh/mysqlrtb
+        environment:
+          - MYSQL_ROOT_PASSWORD=rtb4free
+          - MYSQL_DATABASE=rtb4free
+          - MYSQL_USER=ben
+          - MYSQL_PASSWORD=test
+      web:
+        image: ploh/rtbadmin_open
+        command: bash -c "./wait_for_it.sh db:3306 --timeout=120; bundle exec rails s -p 3000 -b '0.0.0.0' -e development"
+        ports:
+          - "3000:3000"
+        environment:
+          - CUSTOMER_NAME=RTB4FREE
+          - RTB4FREE_DATABASE_HOST=db
+          - RTB4FREE_DATABASE_PORT=3306
+          - RTB4FREE_DATABASE_USERNAME=ben
+          - RTB4FREE_DATABASE_PASSWORD=test
+          - RTB4FREE_DATABASE_NAME=rtb4free
+          - ELASTICSEARCH_ENABLE=true
+          - ELASTICSEARCH_HOST=elastic1:9200
+          - ELASTICSEARCH_KIBANA_URL=http://kibana:5601/
+          - RTB_CROSSTALK_REGION_HOSTS={"US" => "crosstalk"}
+          - RTB_CROSSTALK_PORT=8100
+          - RTB_CROSSTALK_USER=ben
+          - RTB_CROSSTALK_PASSWORD=iamspartacus
+      elastic1:
+        image: ploh/elastic_pwd
+        environment:
+          - discovery.type=single-node
+          - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+      logstash1:
+        image: ploh/logstash_pwd
+        environment:
+          - "XPACK_MONITORING_ELASTICSEARCH_URL=http://elastic1:9200"
+          - "XPACK_MONITORING_ENABLED=true"
+      kibana:
+        image: docker.elastic.co/kibana/kibana:6.2.2
+        environment:
+          - SERVER_NAME=elastic1
+          - ELASTICSEARCH_URL=http://elastic1:9200
+        ports:
+          - "5601:5601"
+      simulator:
+        image: "jacamars/rtb4free:v1"
+        environment:
+          BIDDER: "bidder:8080"
+          WIN:    "10"
+          PIXEL:  "95"
+          CLICK:  "2"
+          SLEEP:  "100"
+        command: bash -c "./wait-for-it.sh bidder:8080 -t 120 && sleep 60;  ./load-elastic -host $$BIDDER -win $$WIN -pixel $$PIXEL -click $$CLICK -sleep $$SLEEP"
 
-This quick start will walk you through creating the basic configuration; in most cases, you
-can just accept the defaults. When it's done, you'll have an ``index.rst``, a
-``conf.py`` and some other files. Add these to revision control.
-
-Now, edit your ``index.rst`` and add some information about your project.
-Include as much detail as you like (refer to the reStructuredText_ syntax
-or `this template`_ if you need help). Build them to see how they look:
+Start the docker swarm
 
 .. prompt:: bash $
 
-    make html
+    docker stack deploy -c docker-compose-rtb4free.yml rtb4free 
 
-Your ``index.rst`` has been built into ``index.html``
-in your documentation output directory (typically ``_build/html/index.html``).
-Open this file in your web browser to see your docs.
 
-.. .. figure:: ../_static/images/first-steps/sphinx-hello-world.png
-..     :align: right
-..     :figwidth: 300px
-..     :target: ../_static/images/first-steps/sphinx-hello-world.png
-..
-..     Your Sphinx project is built
-
-Edit your files and rebuild until you like what you see, then commit your changes and push to your public repository.
-Once you have Sphinx documentation in a public repository, you can start using Read the Docs
-.. by :doc:`importing your docs </intro/import-guide>`.
-
-.. _install Sphinx: http://sphinx-doc.org/install.html
-.. _reStructuredText: http://sphinx-doc.org/rest.html
-.. _this template: https://www.writethedocs.org/guide/writing/beginners-guide-to-docs/#id1
-
-Using Markdown with Sphinx
---------------------------
-
-You can use Markdown and reStructuredText in the same Sphinx project.
-We support this natively on Read the Docs, and you can do it locally:
+You should see containers starting each RTB4FREE component.
+To show the status, issue the command: 
 
 .. prompt:: bash $
 
-    pip install recommonmark
+    docker stack ps rtb4free
 
-Then in your ``conf.py``:
+You should see the following response.
 
-.. code-block:: python
+.. prompt:: bash $
 
-   extensions = ['recommonmark']
+    xxxx
 
-.. warning:: Markdown doesn't support a lot of the features of Sphinx,
-          like inline markup and directives. However, it works for
-          basic prose content. reStructuredText is the preferred
-          format for technical documentation, please read `this blog post`_
-          for motivation.
+After the system is started, you can try the following actions.
+
+* Access the campaing manager by opening a browser to URL http://localhost:3000/.
+You can log in with user ID demo@rtb4free.com, password rtb4free.
+	* View how a sample campaign is defined.
+	* View how a sample creative is defined.
+	* View how a sample target is defined.
+	* View the sample reports dashboard.
+	* Edit the sample campaigns.
+
+* The application includes the ELK stack (http://elastic.co) for ingesting RTB log events. 
+	* You can access Kibana reporting system at URL http://localhost:5601.
+	* On the discover screem, the index drop down will allow you to show requests, bid and wins processed by the bidder.
+	* Build custom visualizations and dashboards using Kibana.
+
+* Explore the internal works of the bidder by logging into the bidder console at http://localhost:8080/admin_login.
 
 .. _this blog post: http://ericholscher.com/blog/2016/mar/15/dont-use-markdown-for-technical-docs/
 
@@ -114,12 +193,9 @@ Then in your ``conf.py``:
 External resources
 ------------------
 
-Here are some external resources to help you learn more about Sphinx.
+Here are some external resources to help you learn more about RTB4FREE.
 
-* `Sphinx documentation`_
-* `RestructuredText primer`_
-* `An introduction to Sphinx and Read the Docs for technical writers`_
+* `RTB4FREE documentation`_
 
-.. _Sphinx documentation: http://www.sphinx-doc.org/
-.. _RestructuredText primer: http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html
-.. _An introduction to Sphinx and Read the Docs for technical writers: http://ericholscher.com/blog/2016/jul/1/sphinx-and-rtd-for-writers/
+
+.. _RTB4FREE documentation: http://www.rtb4free.com/doc_index
