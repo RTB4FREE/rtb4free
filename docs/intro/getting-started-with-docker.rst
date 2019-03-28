@@ -9,7 +9,7 @@ if RTB4FREE is right for your business.
   All services are installed on a single machine in this installation method.  This
   is not recommended for production use - only for demonstration purposes.
 
-
+This quickstart process performs the following tasks:
 * Starts a complete RTB system, along with a campaign manager and reporting system.
 * A demo campaign configuration is loaded and can be edited in the campaign manager.
 * An SSP exchange simulator is started, sending bid requests to the system. This shows a working RTB application processing real bids.
@@ -49,110 +49,8 @@ Create the Docker swarm.
 
 Create the docker compose file. Edit a new file called docker-compose-rtb4free.yml, then add the following contents.
 
-.. prompt:: bash $
-
-    version: "3"
-    services:
-      zookeeper:
-        image: "zookeeper"
-      kafka:
-        image: "ches/kafka"
-        environment:
-          ZOOKEEPER_IP: "zookeeper"
-        ports:
-          - "9092:9092"
-        depends_on:
-          - zookeeper
-      zerospike:
-        image: "jacamars/zerospike:v1"
-        environment:
-          BROKERLIST: "kafka:9092"
-        depends_on:
-          - kafka
-        command: bash -c "sleep 5 && ./wait-for-it.sh kafka:9092 -t 120 && sleep 1; ./zerospike"
-      bidder:
-        image: "jacamars/rtb4free:v1"
-        environment:
-          BROKERLIST: "kafka:9092"
-          PUBSUB: "zerospike"
-          EXTERNAL: "http://localhost"
-          ADMINPORT: "0"
-          ACCOUNTING: "accountingsystem"
-          FREQGOV: "false"
-          INDEXPAGE: "/index.html"
-        ports:
-          - "80:8080"
-          - "8155:8155"
-        depends_on:
-          - kafka
-          - zerospike
-        command: bash -c "sleep 5 && ./wait-for-it.sh kafka:9092 -t 120 && ./wait-for-it.sh zerospike:6000 -t 120 && sleep 1; ./rtb4free"
-      crosstalk:
-        image: "jacamars/crosstalk:v1"
-        environment:
-          REGION: "US"
-          GHOST: "elastic1"
-          AHOST: "elastic1"
-          BROKERLIST: "kafka:9092"
-          PUBSUB: "zerospike"
-          CONTROL: "8100"
-          JDBC: "jdbc:mysql://db/rtb4free?user=ben&password=test"
-          PASSWORD: "iamspartacus"
-        depends_on:
-          - kafka
-          - zerospike
-      db:
-        image: ploh/mysqlrtb
-        environment:
-          - MYSQL_ROOT_PASSWORD=rtb4free
-          - MYSQL_DATABASE=rtb4free
-          - MYSQL_USER=ben
-          - MYSQL_PASSWORD=test
-      web:
-        image: ploh/rtbadmin_open
-        command: bash -c "./wait_for_it.sh db:3306 --timeout=120; bundle exec rails s -p 3000 -b '0.0.0.0' -e development"
-        ports:
-          - "3000:3000"
-        environment:
-          - CUSTOMER_NAME=RTB4FREE
-          - RTB4FREE_DATABASE_HOST=db
-          - RTB4FREE_DATABASE_PORT=3306
-          - RTB4FREE_DATABASE_USERNAME=ben
-          - RTB4FREE_DATABASE_PASSWORD=test
-          - RTB4FREE_DATABASE_NAME=rtb4free
-          - ELASTICSEARCH_ENABLE=true
-          - ELASTICSEARCH_HOST=elastic1:9200
-          - ELASTICSEARCH_KIBANA_URL=http://kibana:5601/
-          - RTB_CROSSTALK_REGION_HOSTS={"US" => "crosstalk"}
-          - RTB_CROSSTALK_PORT=8100
-          - RTB_CROSSTALK_USER=ben
-          - RTB_CROSSTALK_PASSWORD=iamspartacus
-      elastic1:
-        image: ploh/elastic_pwd
-        environment:
-          - discovery.type=single-node
-          - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
-      logstash1:
-        image: ploh/logstash_pwd
-        environment:
-          - "XPACK_MONITORING_ELASTICSEARCH_URL=http://elastic1:9200"
-          - "XPACK_MONITORING_ENABLED=true"
-      kibana:
-        image: docker.elastic.co/kibana/kibana:6.2.2
-        environment:
-          - SERVER_NAME=elastic1
-          - ELASTICSEARCH_URL=http://elastic1:9200
-        ports:
-          - "5601:5601"
-      simulator:
-        image: "jacamars/rtb4free:v1"
-        environment:
-          BIDDER: "bidder:8080"
-          WIN:    "10"
-          PIXEL:  "95"
-          CLICK:  "2"
-          SLEEP:  "100"
-        command: bash -c "./wait-for-it.sh bidder:8080 -t 120 && sleep 60;  ./load-elastic -host $$BIDDER -win $$WIN -pixel $$PIXEL -click $$CLICK -sleep $$SLEEP"
+.. literalinclude:: ../../examples/docker-compose.yml
+   :language: yaml
 
 Start the docker swarm
 
