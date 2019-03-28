@@ -21,12 +21,28 @@ https://rtb4free.readthedocs.io/en/latest/
 
 To build a local copy of the RTB4FREE documentation, follow these steps:
 
-### Step 1
+### Clone the rtb4free repo
 
 Make a local directory and clone this repo:
 
 ```
 mkdir rtb4free
 cd rtb4free
+git clone git@github.com:switzer/rtb4free.git
+cd rtb4free
+```
+### Build the user documentation
+
+Build the user documentation, which is built on [Sphinx](http://www.sphinx-doc.org/en/master/) and [ReadTheDocs](https://readthedocs.org/)
+
+```
+cd docs
+make html
+```
+
+This will build HTML doc in the `rtb4free/docs/_build/html` directory.  Open the `index.html` file to view the documentation on your local system.
+
+
+
 
 
