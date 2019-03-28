@@ -40,7 +40,7 @@ cd docs
 make html
 ```
 
-This will build HTML doc in the `rtb4free/docs/_build/html` directory.
+This will build HTML doc in the `rtb4free/docs/_build/html` directory.  Open the `index.html` file to view the documentation on your local system.
 
 
 
