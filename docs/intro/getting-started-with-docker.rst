@@ -11,18 +11,20 @@ if RTB4FREE is right for your business.
 
 
 * Starts a complete RTB system, along with a campaign manager and reporting system.
-* A demo campaign configuration is loaded and can be edited in the campaign manager. 
-* An SSP exchange simulator is started, sending bid requests to the system. This shows a working RTB application processing real bids. 
+* A demo campaign configuration is loaded and can be edited in the campaign manager.
+* An SSP exchange simulator is started, sending bid requests to the system. This shows a working RTB application processing real bids.
 * View how data flows through the system in real-time with the deployed reporting system.
 
 .. _extensions: http://www.sphinx-doc.org/en/master/ext/builtins.html#builtin-sphinx-extensions
 
 
+.. _quick-start-video:
+
 Quick start video
 -----------------
 
 This screencast will help you get started or you can
-:ref:`read our guide below <intro/getting-started-with-docker:Quick start>`.
+:ref:`read our guide below <quick-start>`.
 
 .. raw:: html
 
@@ -31,10 +33,12 @@ This screencast will help you get started or you can
     </div>
 
 
+.. _quick-start:
+
 Quick start
 -----------
 
-This quick start process will deploy a Docker swarm application.  
+This quick start process will deploy a Docker swarm application.
 You must have Docker installed on your system before you start - https://docs.docker.com/v17.12/install/
 
 Create the Docker swarm.
@@ -154,11 +158,11 @@ Start the docker swarm
 
 .. prompt:: bash $
 
-    docker stack deploy -c docker-compose-rtb4free.yml rtb4free 
+    docker stack deploy -c docker-compose-rtb4free.yml rtb4free
 
 
 You should see containers starting each RTB4FREE component.
-To show the status, issue the command: 
+To show the status, issue the command:
 
 .. prompt:: bash $
 
@@ -172,15 +176,14 @@ You should see the following response.
 
 After the system is started, you can try the following actions.
 
-* Access the campaing manager by opening a browser to URL http://localhost:3000/.
-You can log in with user ID demo@rtb4free.com, password rtb4free.
+* Access the campaing manager by opening a browser to URL http://localhost:3000/. You can log in with user ID demo@rtb4free.com, password rtb4free.
 	* View how a sample campaign is defined.
 	* View how a sample creative is defined.
 	* View how a sample target is defined.
 	* View the sample reports dashboard.
 	* Edit the sample campaigns.
 
-* The application includes the ELK stack (http://elastic.co) for ingesting RTB log events. 
+* The application includes the ELK stack (http://elastic.co) for ingesting RTB log events.
 	* You can access Kibana reporting system at URL http://localhost:5601.
 	* On the discover screem, the index drop down will allow you to show requests, bid and wins processed by the bidder.
 	* Build custom visualizations and dashboards using Kibana.
