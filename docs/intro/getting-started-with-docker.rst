@@ -1,7 +1,7 @@
 Getting Started with Docker
 ===========================
 
-The simplest way to get started with RTB4FREE is to use Docker to install all components
+The simplest way to get started with RTB4Free is to use Docker Compose to install all components
 onto a single system, so that you can experience the functionality and quickly see
 if RTB4FREE is right for your business.
 
@@ -10,6 +10,7 @@ if RTB4FREE is right for your business.
   is not recommended for production use - only for demonstration purposes.
 
 This quickstart process performs the following tasks:
+
 * Starts a complete RTB system, along with a campaign manager and reporting system.
 * A demo campaign configuration is loaded and can be edited in the campaign manager.
 * An SSP exchange simulator is started, sending bid requests to the system. This shows a working RTB application processing real bids.
@@ -39,28 +40,47 @@ Quick start
 -----------
 
 This quick start process will deploy a Docker swarm application.
-You must have Docker installed on your system before you start - https://docs.docker.com/v17.12/install/
+You must have `Docker Compose installed on your system <https://docs.docker.com/compose/install/>`_ before you start.
 
-Create the Docker swarm.
-
-.. prompt:: bash $
-
-    docker swarm init
-
-Create the docker compose file. Edit a new file called docker-compose-rtb4free.yml, then add the following contents.
+Create the docker compose file. Edit a new file called docker-compose.yml, then add the following contents:
 
 .. literalinclude:: ../../examples/docker-compose.yml
    :language: yaml
 
-Start the docker swarm
+Build the project.  From the directory where you saved the docker-compose.yml file, run the following command:
 
 .. prompt:: bash $
 
-    docker stack deploy -c docker-compose-rtb4free.yml rtb4free
+    docker-compose up -d
+
+You should see containers starting each RTB4Free component.
+
+Looking around
+--------------
+
+To view each of the components running:
+
+.. prompt:: bash $
+
+    docker ps
 
 
-You should see containers starting each RTB4FREE component.
-To show the status, issue the command:
+To stop the containers:
+
+.. prompt:: bash $
+
+    docker-compose down
+
+
+================  =====================  ==========
+COMPONENT         LOCATION               LOGIN
+================  =====================  ==========
+Campaign Manager  http://localhost:8080  username:
+                                         password:
+MySQL Database
+================  =====================  ==========
+
+To view the containers:
 
 .. prompt:: bash $
 

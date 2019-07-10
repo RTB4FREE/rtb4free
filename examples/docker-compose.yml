@@ -1,123 +1,245 @@
-version: '3.3'
+#
+# Contains the full rtb4free stack (zookeeper, kafka, zerospike, bidder, crosstalk, db, web, elastic, logstash, simulator)
+#
+version: '3.5'
+
 services:
 
   zookeeper:
-    image: zookeeper
+    image: zookeeper:3.5
+    ports:
+      - '2181:2181'
+    networks:
+#      - r4f_control
+      - r4f_net
 
   kafka:
     image: wurstmeister/kafka
     environment:
-      ZOOKEEPER_IP: "zookeeper"
+      KAFKA_ADVERTISED_HOST_NAME: kafka
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'false'
+      KAFKA_CREATE_TOPICS: bids:1:1,wins:1:1,requests:1:1,clicks:1:1,pixels:1:1,videoevents:1:1,postbackevents:1:1,status:1:1,reasons:1:1,logs:1:1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
     ports:
-      - "9092:9092"
+      - '9092:9092'
     depends_on:
       - zookeeper
+    networks:
+      # - r4f_kafka
+      # - r4f_control
+      - r4f_net
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
   zerospike:
-    image: jacamars/zerospike:v1
+    image: rtb4free/zerospike
     environment:
       BROKERLIST: "kafka:9092"
+    ports:
+      - "6000:6000"
+      - "6001:6001"
+      - "6002:6002"
+      - "7001:7001"
     depends_on:
       - kafka
+    networks:
+      # - r4f_kafka
+      # - r4f_control
+      - r4f_net
     command: bash -c "sleep 5 && ./wait-for-it.sh kafka:9092 -t 120 && sleep 1; ./zerospike"
 
   bidder:
-    image: jacamars/rtb4free:v1
+    image: rtb4free/bidder
     environment:
+      # GDPR mode - set to true if operating inside a region that enforces GDPR
+      GDPR_MODE: "false"
+      # The Kafka setup - all of the channels which to deliver events
       BROKERLIST: "kafka:9092"
+      BIDSCHANNEL: "kafka://[$$BROKERLIST]&topic=bids"
+      WINSCHANNEL: "kafka://[$$BROKERLIST]&topic=wins"
+      REQUESTSCHANNEL: "kafka://[$$BROKERLIST]&topic=requests"
+      CLICKSCHANNEL: "kafka://[$$BROKERLIST]&topic=clicks"
+      PIXELSCHANNEL: "kafka://[$$BROKERLIST]&topic=pixels"
+      VIDEOEVENTSCHANNEL: "kafka://[$$BROKERLIST]&topic=videoevents"
+      POSTBACKEVENTSCHANNEL: "kafka://[$$BROKERLIST]&topic=postbackevents"
+      STATUSCHANNEL: "kafka://[$$BROKERLIST]&topic=status"
+      REASONSCHANNEL: "kafka://[$$BROKERLIST]&topic=reasons"
+      LOGCHANNEL: "kafka://[$$BROKERLIST]&topic=logs"
+      # If using Amazon S3 to store data, enter configuration settings below
+      S3BUCKET: ""
+      S3REGION: ""
+      S3SECRETKEY: ""
+      S3ACCESSKEY: ""
+      AWSACCESSKEY: ""
+      AWSSECRETKEY: ""
+      AWSREGION: ""
+      # Enter SSP information below
+      GOOGLE_EKEY: ""
+      GOOGLE_IKEY: ""
+      OPENX_EKEY: ""
+      OPENX_IKEY: ""
+      ADX_EKEY:   ""
+      ADX_IKEY:   ""
+      BIDSWITCH_ID: "1234"
+      # Enter information about how to access
       PUBSUB: "zerospike"
-      EXTERNAL: "http://localhost"
+      EXTERNAL: "http://localhost:8080"
       ADMINPORT: "0"
       ACCOUNTING: "accountingsystem"
       FREQGOV: "false"
       INDEXPAGE: "/index.html"
     ports:
-      - "80:8080"
+      - "8080:8080"
       - "8155:8155"
+      - "7379:7379"
+      - "7000:7000"
     depends_on:
       - kafka
+      - crosstalk
       - zerospike
+    networks:
+      # - r4f_kafka
+      # - r4f_control
+      # - r4f_rtb
+      - r4f_net
     command: bash -c "sleep 5 && ./wait-for-it.sh kafka:9092 -t 120 && ./wait-for-it.sh zerospike:6000 -t 120 && sleep 1; ./rtb4free"
 
-  crosstalk:
-    image: jacamars/crosstalk:v1
-    environment:
-      REGION: "US"
-      GHOST: "elastic1"
-      AHOST: "elastic1"
-      BROKERLIST: "kafka:9092"
-      PUBSUB: "zerospike"
-      CONTROL: "8100"
-      JDBC: "jdbc:mysql://mysql/rtb4free?user=rtb4free&password=rtb4free"
-      PASSWORD: "rtb4free"
-    depends_on:
-      - kafka
-      - zerospike
-
-  mysql:
-    image: rtb4free/mysql-demo
-    volumes:
-      - db_data:/var/lib/mysql
-    ports:
-      - "3306:3306"
-    restart: always
-    environment:
-      - MYSQL_ROOT_PASSWORD=rtb4free
-      - MYSQL_DATABASE=rtb4free
-      - MYSQL_USER=rtb4free
-      - MYSQL_PASSWORD=rtb4free
-
-  web:
-    image: ploh/rtbadmin_open
-    command: bash -c "./wait_for_it.sh mysql:3306 --timeout=120; bundle exec rails s -p 3000 -b '0.0.0.0' -e development"
-    ports:
-      - "3000:3000"
-    environment:
-      - CUSTOMER_NAME=RTB4FREE
-      - RTB4FREE_DATABASE_HOST=mysql
-      - RTB4FREE_DATABASE_PORT=3306
-      - RTB4FREE_DATABASE_USERNAME=rtb4free
-      - RTB4FREE_DATABASE_PASSWORD=rtb4free
-      - RTB4FREE_DATABASE_NAME=rtb4free
-      - ELASTICSEARCH_ENABLE=true
-      - ELASTICSEARCH_HOST=elastic1:9200
-      - ELASTICSEARCH_KIBANA_URL=http://kibana:5601/
-      - RTB_CROSSTALK_REGION_HOSTS={"US" => "crosstalk"}
-      - RTB_CROSSTALK_PORT=8100
-      - RTB_CROSSTALK_USER=rtb4free
-      - RTB_CROSSTALK_PASSWORD=rtb4free
-
-  elastic:
-    image: ploh/elastic_pwd
-    environment:
-      - discovery.type=single-node
-      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
-
-  logstash:
-    image: ploh/logstash_pwd
-    environment:
-      - "XPACK_MONITORING_ELASTICSEARCH_URL=http://elastic1:9200"
-      - "XPACK_MONITORING_ENABLED=true"
-
-  kibana:
-    image: docker.elastic.co/kibana/kibana:6.2.2
-    environment:
-      - SERVER_NAME=elastic1
-      - ELASTICSEARCH_URL=http://elastic1:9200
-    ports:
-      - "5601:5601"
-
+  # Enable if you'd like to use the bidding simulator to test connections
   simulator:
-    image: jacamars/rtb4free:v1
+    image: rtb4free/bidder
     environment:
       BIDDER: "bidder:8080"
       WIN:    "10"
       PIXEL:  "95"
       CLICK:  "2"
       SLEEP:  "100"
+      SILENT: "-silent"
+    networks:
+      # - r4f_rtb
+      - r4f_net
     command: bash -c "./wait-for-it.sh bidder:8080 -t 120 && sleep 60;  ./load-elastic -host $$BIDDER -win $$WIN -pixel $$PIXEL -click $$CLICK -sleep $$SLEEP"
+
+  crosstalk:
+    image: rtb4free/crosstalk
+    environment:
+      REGION: "US"
+      GHOST: "elastic"
+      AHOST: "elastic"
+      BROKERLIST: "kafka:9092"
+      PUBSUB: "zerospike"
+      CONTROL: "8100"
+      JDBC: "jdbc:mysql://db/rtb4free?user=rtb4free&password=rtb4free"
+      PASSWORD: "rtb4free"
+    depends_on:
+      - kafka
+      - zerospike
+      - elastic
+      - db
+    networks:
+      # - r4f_kafka
+      # - r4f_control
+      - r4f_net
+
+  db:
+    image: mysql:5.7
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - '3306:3306'
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=rtb4free
+      - MYSQL_DATABASE=rtb4free
+      - MYSQL_USER=rtb4free
+      - MYSQL_PASSWORD=rtb4free
+    healthcheck:
+        test: ["CMD-SHELL", "mysqladmin -h 'localhost' -u root -prtb4free ping --silent"]
+        interval: 30s
+        timeout: 30s
+        retries: 3
+    networks:
+      # - r4f_control
+      - r4f_net
+    # custom command is necessary to override 'latin' default charset
+    command: mysqld --character-set-server=utf8 --collation-server=utf8_general_ci
+
+  web:
+    image: rtb4free/campaign-manager
+    ports:
+      - "3000:3000"
+    environment:
+      - CUSTOMER_NAME=RTB4FREE
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_USERNAME=rtb4free
+      - DB_PASSWORD=rtb4free
+      - DB_NAME=rtb4free
+      - ELASTICSEARCH_ENABLE=true
+      - ELASTICSEARCH_HOST=elastic:9200
+      - ELASTICSEARCH_KIBANA_URL=http://kibana:5601/
+      - RTB_CROSSTALK_REGION_HOSTS={"US" => "crosstalk"}
+    depends_on:
+      - db
+    networks:
+      # - r4f_control
+      - r4f_net
+    command: bundle exec rails s -p 3000 -b '0.0.0.0'
+
+  elastic:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.2.0
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+    depends_on:
+      - db
+    healthcheck:
+        test: ["CMD-SHELL", "curl --silent --fail localhost:9200/_cluster/health || exit 1"]
+        interval: 30s
+        timeout: 30s
+        retries: 3
+    volumes:
+      - esdata1:/usr/share/elasticsearch/data
+    networks:
+      # - r4f_kafka
+      # - r4f_control
+      - r4f_net
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.2.0
+    ports:
+      - "5044:5044"
+    environment:
+      - "XPACK_MONITORING_ELASTICSEARCH_URL=http://elastic:9200"
+      - "XPACK_MONITORING_ENABLED=true"
+      - "LS_JAVA_OPTS=-Xmx1g"
+    networks:
+      # - r4f_kafka
+      # - r4f_control
+      - r4f_net
+    volumes:
+      - "./logstash:/usr/share/logstash/pipeline"
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.2.0
+    environment:
+      - SERVER_NAME=elastic
+      - ELASTICSEARCH_URL=http://elastic:9200
+    ports:
+      - "5601:5601"
+    networks:
+      # - r4f_control
+      - r4f_net
 
 volumes:
   db_data: {}
+  esdata1:
+    driver: local
+
+networks:
+  # r4f_rtb:
+  # r4f_control:
+  # r4f_kafka:
+  r4f_net:
